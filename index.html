@@ -4,42 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
-    
-    <title>Museum Lichtenberg</title>
+    <title>Orte der Erinnerung, des Widerstands und der Solidarität</title>
     
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Colors */
-            --bg-color: #050505; --text-main: #ffffff;
-            --c-erinnerung: #D4AF37;   /* Gold */
-            --c-gedenken: #A0A0A0;     /* Silver */
-            --c-widerstand: #00E676;   /* Neon Green */
-            --c-heute: #FF3D00;        /* Neon Red */
-            --c-path: #00FFFF;         /* Cyan Path */
-
-            /* Fonts */
-            --font-head: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif;
+            --bg-color: #050505; 
+            --text-main: #ffffff;
+            --c-erinnerung: #D4AF37; /* Gold */
+            --c-gedenken: #A0A0A0;   /* Silber */
+            --c-widerstand: #00E676; /* Neon Grün */
+            --c-heute: #FF3D00;      /* Neon Rot */
+            --c-path: #00FFFF;
+            --font-head: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
             --sidebar-width: 500px;
         }
 
         body { margin: 0; padding: 0; background: var(--bg-color); color: var(--text-main); font-family: var(--font-body); overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
 
-        /* --- START SCREEN --- */
+        /* START SCREEN */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); text-align: center; padding: 20px;
         }
         .start-btn {
             background: var(--c-widerstand); color: black; border: none;
@@ -51,58 +47,29 @@
         }
         .start-btn:active { transform: scale(0.95); }
 
-        /* --- MINI SCANNER (Positioned Lower) --- */
-        #mini-scanner {
-            position: absolute; 
-            top: 260px; /* Position tiefer */
-            left: 30px; 
-            width: 120px; height: 120px; 
-            background: #000;
-            border: 2px solid #444;
-            border-radius: 12px;
-            overflow: hidden;
-            z-index: 50;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            transition: border-color 0.3s;
-        }
-        #reader { width: 100%; height: 100%; object-fit: cover; }
-        
-        .scanner-label {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.6); color: #aaa;
-            font-size: 9px; text-align: center; padding: 3px;
-            font-family: var(--font-head); letter-spacing: 1px;
-            pointer-events: none;
-        }
-
-        /* Overlay bei Treffer */
-        #scan-hit-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 230, 118, 0.95); /* Green */
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
-        .hit-icon { font-size: 24px; color: black; font-weight: bold; }
-        .hit-text { font-size: 10px; color: black; font-family: var(--font-head); font-weight: bold; margin-top: 2px; }
-
         /* UI LAYER */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         .vignette-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,1) 90%); }
         
-        header { position: absolute; top: 30px; left: 30px; pointer-events: auto; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        header { position: absolute; top: 30px; left: 30px; pointer-events: auto; text-shadow: 0 0 10px rgba(0,0,0,0.8); z-index: 20; }
         .museum-label { font-family: var(--font-head); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: #aaa; margin-bottom: 5px; font-weight: 500; border-left: 3px solid var(--c-widerstand); padding-left: 10px; }
-        h1 { font-family: var(--font-head); font-size: 3rem; margin: 0; line-height: 0.9; font-weight: 700; color: white; letter-spacing: -1px; }
+        h1 { font-family: var(--font-head); font-size: 2.5rem; margin: 0; line-height: 1.1; font-weight: 700; color: white; letter-spacing: -1px; }
 
-        #timeline-ui { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 900px; min-width: 320px; pointer-events: auto; text-align: center; background: rgba(10, 10, 10, 0.85); padding: 15px 40px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #year-display { font-family: var(--font-head); font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 5px; line-height: 1; color: white; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #444; border-radius: 2px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #fff; border: 2px solid #000; margin-top: -8px; transition: transform 0.1s; }
-        .ticks { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; font-size: 0.8rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-head); }
-        .ticks span { text-align: center; flex: 1; }
-        .ticks span:first-child { text-align: left; }
-        .ticks span:last-child { text-align: right; }
+        /* SCANNER */
+        #mini-scanner {
+            position: absolute; top: 260px; left: 30px; 
+            width: 120px; height: 120px; 
+            background: #000; border: 2px solid #444; border-radius: 12px;
+            overflow: hidden; z-index: 50; pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); transition: border-color 0.3s;
+        }
+        #reader { width: 100%; height: 100%; object-fit: cover; }
+        .scanner-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: #aaa; font-size: 9px; text-align: center; padding: 3px; font-family: var(--font-head); letter-spacing: 1px; pointer-events: none; }
+        #scan-hit-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 230, 118, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .hit-icon { font-size: 24px; color: black; font-weight: bold; }
+        .hit-text { font-size: 10px; color: black; font-family: var(--font-head); font-weight: bold; margin-top: 2px; }
 
+        /* STATUS & LEGEND */
         #status-panel { position: absolute; top: 30px; right: 30px; width: 240px; pointer-events: auto; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; border: 1px solid #333; }
         .status-header { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
         .progress-bar { width: 100%; height: 4px; background: #333; margin-top: 8px; border-radius: 2px; }
@@ -113,28 +80,29 @@
         .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #ccc; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
+        /* SIDEBAR */
         #sidebar { position: absolute; right: 0; top: 0; bottom: 0; width: var(--sidebar-width); background: #080808; border-left: 1px solid #333; z-index: 60; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); overflow-y: auto; pointer-events: auto; display: flex; flex-direction: column; box-shadow: -20px 0 50px rgba(0,0,0,0.8); }
         #sidebar.open { transform: translateX(0); }
         .close-area { position: sticky; top: 0; width: 100%; height: 70px; z-index: 50; display: flex; justify-content: flex-end; align-items: center; padding-right: 25px; background: linear-gradient(to bottom, rgba(8,8,8,1) 50%, rgba(8,8,8,0)); }
         .close-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .close-btn:hover { background: white; color: black; }
-        .sidebar-content { padding: 40px; padding-top: 0; }
+        .sidebar-content { padding: 40px; padding-top: 0; padding-bottom: 80px; }
         .hero-img { width: 100%; height: 300px; object-fit: cover; border-bottom: 4px solid #333; margin-bottom: 25px; }
         .cat-tag { font-family: var(--font-head); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: inline-block; padding: 4px 8px; border: 1px solid #444; color: #fff; }
         h2 { font-family: var(--font-head); font-size: 2.2rem; line-height: 1.1; margin: 0 0 25px 0; font-weight: 700; color: white; }
         .article { font-size: 1.05rem; line-height: 1.7; color: #ccc; font-weight: 300; margin-bottom: 40px; }
         .article h3 { color: white; font-family: var(--font-head); font-size: 1.2rem; margin-top: 30px; margin-bottom: 10px; font-weight: 500; border-left: 3px solid var(--c-path); padding-left: 10px; }
         .source { font-size: 0.75rem; color: #666; border-top: 1px solid #222; padding-top: 20px; font-style: italic; }
+        .footer-note { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; color: #888; font-size: 0.9rem; }
         .locked-view { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; color: #555; }
         .locked-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
-        .footer-note { font-size: 0.8rem; color: #888; margin-top: 30px; border-top: 1px solid #333; padding-top: 15px; }
 
         @media (max-width: 1024px) {
             :root { --sidebar-width: 100%; }
-            #timeline-ui { width: 90%; bottom: 20px; padding: 15px 20px; }
             .sidebar-content { padding: 25px; }
-            #mini-scanner { top: 120px; left: 20px; } 
+            #mini-scanner { top: 180px; left: 20px; }
         }
+        
         .mapboxgl-popup-content { background: #000; color: #fff; border: 1px solid #444; font-family: var(--font-body); padding: 10px 14px; }
         .mapboxgl-popup-close-button { display: none; }
     </style>
@@ -142,9 +110,9 @@
 <body class="p-1933">
 
     <div id="start-screen">
-        <h1 style="color:white; margin-bottom: 10px; text-shadow:0 0 20px black;">Museum Lichtenberg</h1>
-        <p style="color:#aaa; font-family:var(--font-head);">Orte des Widerstands</p>
-        <button class="start-btn" onclick="startExhibition()">Ausstellung Starten</button>
+        <h1 style="color:white; margin-bottom: 10px; text-shadow:0 0 20px black;">Orte der Erinnerung, des Widerstands und der Solidarität</h1>
+        <p style="color:#aaa; font-family:var(--font-head);">Berlin-Lichtenberg</p>
+        <button class="start-btn" onclick="startApp()">Karte Starten</button>
     </div>
 
     <div id="map"></div>
@@ -159,7 +127,6 @@
         <div id="mini-scanner">
             <div id="reader"></div>
             <div class="scanner-label">SCAN QR</div>
-            
             <div id="scan-hit-overlay" onclick="executeScanAction()">
                 <div class="hit-icon">➜</div>
                 <div class="hit-text">ÖFFNEN</div>
@@ -167,24 +134,15 @@
         </div>
 
         <div id="status-panel">
-            <div class="status-header">Archiv Fortschritt</div>
+            <div class="status-header">Fortschritt</div>
             <div class="progress-bar"><div class="progress-fill" id="progress-bar"></div></div>
             <div class="lock-text" id="lock-status">GEGENWART GESPERRT</div>
         </div>
 
         <div id="legend">
-            <div class="legend-item"><div class="dot" style="background:var(--c-erinnerung)"></div> Orte der Erinnerung</div>
-            <div class="legend-item"><div class="dot" style="background:var(--c-gedenken)"></div> Gedenken</div>
-            <div class="legend-item"><div class="dot" style="background:var(--c-widerstand)"></div> Widerstand</div>
-            <div class="legend-item"><div class="dot" style="background:var(--c-heute)"></div> Gegen Rechts Heute</div>
-        </div>
-
-        <div id="timeline-ui">
-            <span id="year-display">1933</span>
-            <input type="range" id="year-slider" min="1933" max="2026" value="1933" step="1">
-            <div class="ticks">
-                <span>1933</span><span>1990</span><span>2000</span><span>Heute</span>
-            </div>
+            <div class="legend-item"><div class="dot" style="background:var(--c-erinnerung)"></div> Erinnerung (Opfer)</div>
+            <div class="legend-item"><div class="dot" style="background:var(--c-gedenken)"></div> Gedenken (Historisch)</div>
+            <div class="legend-item"><div class="dot" style="background:var(--c-widerstand)"></div> Widerstand (Aktuell)</div>
         </div>
     </div>
 
@@ -195,20 +153,21 @@
 
     <script>
         // ------------------------------------------------------------------
-        // CONFIG
+        [cite_start]// 1. CONTENT DATABASE (FROM PDF) [cite: 1-208]
         // ------------------------------------------------------------------
-        mapboxgl.accessToken = 'pk.eyJ1IjoiaWxpYXNtZXJhYmloYSIsImEiOiJjbWxndXhkeHYwMjZwM2RxdmlmbW41MmVlIn0.pb_GFtsw_uGl7eOkRZfKvw'; 
-
         const geoData = {
             'type': 'FeatureCollection',
             'features': [
-                // === KATEGORIE 1: ORTE DER ERINNERUNG (Opfer & Widerstandskämpfer:innen) ===
+                // === KATEGORIE 1: ORTE DER ERINNERUNG ===
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'kurt_schneider', 'category': 'erinnerung', 'title': 'Kurt Schneider (1961–1999) [cite: 13]', 'year': 1999,
+                        'id': 'kurt_schneider',
+                        'category': 'erinnerung',
+                        'title': 'Kurt Schneider (1961–1999)',
+                        'year': 1999,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/0/01/Memorial_plaque_metal_Kurt_Schneider_Berlin%2C_Germany.jpg',
-                        'description': `<h3>Opfer rechter Gewalt</h3><p>Kurt Schneider wurde 1961 in Königs Wusterhausen geboren. Er arbeitete als Maurer. In der Nacht zum 6. Oktober 1999 wurde er von vier Neonazis überfallen, weil sie seinen Gruß als "Beleidigung" empfanden. [cite_start]Sie schlugen ihn zusammen, kehrten später mit einem Messer zurück und ermordeten ihn[cite: 17, 18].</p><h3>Kontext</h3><p>Vor Gericht gaben die Täter an, ihn als "minderwertigen Menschen" angesehen zu haben. Das Gericht erkannte zunächst kein politisches Motiv. [cite_start]Erst 2018 wurde die Tat durch eine TU-Studie offiziell als rechtsextremer Gewaltakt anerkannt[cite: 22, 25].</p>`,
+                        'description': `<h3>Opfer rechter Gewalt</h3><p>Kurt Schneider wurde 1961 in Königs Wusterhausen geboren. Er arbeitete als Maurer. In der Nacht zum 6. Oktober 1999 wurde er von vier Neonazis überfallen, weil sie seinen Gruß als "Beleidigung" empfanden. [cite_start]Sie schlugen ihn zusammen, kehrten später mit einem Messer zurück und ermordeten ihn [cite: 16-19].</p><h3>Kontext</h3><p>Vor Gericht gaben die Täter an, ihn als "minderwertigen Menschen" angesehen zu haben. Das Gericht erkannte zunächst kein politisches Motiv. [cite_start]Erst 2018 wurde die Tat durch eine TU-Studie offiziell als rechtsextremer Gewaltakt anerkannt [cite: 21-25][cite_start].</p><h3>Gedenken</h3><p>Am 17.08.2021 wurde eine Edelstahltafel in der Rudolf-Reusch-Straße 8 enthüllt[cite: 26].</p>`,
                         'source': 'Gedenktafeln in Berlin - Kurt Schneider'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4802, 52.5185] }
@@ -216,9 +175,12 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'silvio_meier', 'category': 'erinnerung', 'title': 'Silvio Meier (1965–1992) [cite: 30]', 'year': 1992,
+                        'id': 'silvio_meier',
+                        'category': 'erinnerung',
+                        'title': 'Silvio Meier (1965–1992)',
+                        'year': 1992,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/1/14/Silvio_Meier.jpg',
-                        'description': `<h3>Aktivist & Opfer</h3><p>Aktiv in der DDR-Opposition (Kirche von Unten, Umweltbibliothek). [cite_start]Nach der Wende Hausbesetzer in der Schreinerstraße 47. Wurde 1992 aufgrund seines antifaschistischen Auftretens von Neonazis im U-Bahnhof Samariterstraße ermordet[cite: 37, 39].</p><h3>Gedenken</h3><p>Jährliche Gedenkdemonstration (1992–2014). [cite_start]Gedenktafel am U-Bhf Samariterstraße (fest verankert 2007) und Umbenennung der Gabelsbergerstraße in Silvio-Meier-Straße (2013)[cite: 46, 49].</p>`,
+                        'description': `<h3>Aktivist & Opfer</h3><p>Silvio Meier war in der DDR-Opposition aktiv (Kirche von Unten, Umweltbibliothek). [cite_start]Nach der Wende Hausbesetzer in der Schreinerstraße 47. Wurde 1992 aufgrund seines antifaschistischen Auftretens von Neonazis ermordet [cite: 35-39][cite_start].</p><h3>Kontext</h3><p>Die Tat wurde vor Gericht entpolitisiert; die Täter wurden als "Alkoholmissbrauch treibende Jugendgruppe" bezeichnet[cite: 41].</p><h3>Gedenken</h3><p>Jährliche Gedenkdemonstration (1992–2014). [cite_start]Gedenktafel am U-Bhf Samariterstraße und Umbenennung der Gabelsbergerstraße in Silvio-Meier-Straße [cite: 46-49].</p>`,
                         'source': 'Amadeu Antonio Stiftung - Silvio Meier'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4658, 52.5144] }
@@ -226,9 +188,12 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'eugeniu_botnari', 'category': 'erinnerung', 'title': 'Eugeniu Botnari (1982–2016) [cite: 52]', 'year': 2016,
+                        'id': 'eugeniu_botnari',
+                        'category': 'erinnerung',
+                        'title': 'Eugeniu Botnari (1982–2016)',
+                        'year': 2016,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/0/03/Gedenktafel_Eugeniu-Botnari-Platz_%28Rumbg%29_Eugeniu_Botnari.jpg',
-                        'description': `<h3>Opfer rassistischer Gewalt</h3><p>Wurde am 17. September 2016 vom Filialleiter eines Edeka-Marktes des Ladendiebstahls bezichtigt, in ein Lager gezerrt und mit Quarzhandschuhen verprügelt. [cite_start]Botnari starb Tage später an einem Schädel-Hirn-Trauma[cite: 57, 61].</p><h3>Kontext</h3><p>Der Täter filmte die Tat und teilte sie mit menschenverachtenden Kommentaren. Motiv war Sozialdarwinismus (Hass auf Obdachlose) und Rassismus. [cite_start]Im April 2023 wurde der Platz nach Botnari benannt[cite: 64, 71].</p>`,
+                        'description': `<h3>Opfer rassistischer Gewalt</h3><p>Wurde am 17. September 2016 vom Filialleiter eines Edeka-Marktes des Ladendiebstahls bezichtigt, in ein Lager gezerrt und mit Quarzhandschuhen verprügelt. [cite_start]Botnari starb Tage später an einem Schädel-Hirn-Trauma [cite: 57-61].</p><h3>Kontext</h3><p>Der Täter filmte die Tat und teilte sie mit menschenverachtenden Kommentaren. Motiv war Sozialdarwinismus (Hass auf Obdachlose) und Rassismus. [cite_start]Im April 2023 wurde der Platz nach Botnari benannt[cite: 64, 71].</p>`,
                         'source': 'Amadeu Antonio Stiftung - Eugeniu Botnari'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4975, 52.5098] }
@@ -236,21 +201,27 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'kaethe_tucholla', 'category': 'erinnerung', 'title': 'Käthe Tucholla (1910–1943) [cite: 74]', 'year': 1943,
+                        'id': 'kaethe_tucholla',
+                        'category': 'erinnerung',
+                        'title': 'Käthe Tucholla (1910–1943)',
+                        'year': 1943,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Kaskelkiez_Kaskelstr_Gedenktafel_Tucholla.JPG',
-                        'description': `<h3>Widerstandskämpferin</h3><p>Sekretärin und Hockeyspielerin bei Sparta Lichtenberg. Engagierte sich mit ihrem Mann Felix in der KPD-Widerstandsgruppe um Robert Uhrig. [cite_start]Verbreitete Flugblätter und unterstützte Fallschirmjäger[cite: 79, 83].</p><h3>Schicksal</h3><p>Festnahme am 25. Juli 1942. Zum Tode verurteilt wegen "Vorbereitung zum Hochverrat". [cite_start]Ermordet am 28. September 1943 in Plötzensee[cite: 87, 89].</p>`,
-                        'source': 'Frauen im Widerstand gegen den Nationalsozialismus - Käthe Tucholla'
+                        'description': `<h3>Widerstandskämpferin</h3><p>Sekretärin und Hockeyspielerin bei Sparta Lichtenberg. Engagierte sich mit ihrem Mann Felix in der KPD-Widerstandsgruppe um Robert Uhrig. [cite_start]Verbreitete Flugblätter und unterstützte Fallschirmjäger [cite: 78-85].</p><h3>Schicksal</h3><p>Festnahme am 25. Juli 1942. Zum Tode verurteilt wegen "Vorbereitung zum Hochverrat". [cite_start]Ermordet am 28. September 1943 in Plötzensee [cite: 87-89].</p>`,
+                        'source': 'Frauen im Widerstand - Käthe Tucholla'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4832, 52.5038] }
                 },
 
-                // === KATEGORIE 3: ORTE DES GEDENKENS (Historische Orte) ===
+                // === KATEGORIE 3: ORTE DES GEDENKENS (Historisch) ===
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'rummelsburg', 'category': 'gedenken', 'title': 'Gedenkort Rummelsburg (1933–1990) [cite: 139]', 'year': 1933,
+                        'id': 'rummelsburg',
+                        'category': 'gedenken',
+                        'title': 'Gedenkort Rummelsburg',
+                        'year': 1933,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Bundesarchiv_Bild_183-1990-0704-026%2C_Berlin%2C_Rummelsburg%2C_M%C3%A4nnerhaftanstalt.jpg',
-                        'description': `<h3>Verfolgung und Haft</h3><p>1879 als Arbeitshaus eröffnet. Im NS-Staat Verfolgung von "Asozialen"; 1941 Deportation jüdischer Insassen zur Ermordung (Aktion T4). [cite_start]In der DDR Nutzung als Gefängnis (auch für politische Häftlinge)[cite: 143, 146, 152].</p><h3>Status heute</h3><p>Gedenkort seit 2015; [cite_start]Gebäude zu Wohnraum umgebaut[cite: 154, 155].</p>`,
+                        'description': `<h3>Verfolgung von "Asozialen"</h3><p>1879 als Arbeitshaus eröffnet. Im NS-Staat Verfolgung von "Asozialen"; 1941 Deportation jüdischer Insassen zur Ermordung (Aktion T4). [cite_start]In der DDR Nutzung als Gefängnis (auch für politische Häftlinge) [cite: 143-152].</p><h3>Status</h3><p>Gedenkort seit 2015; [cite_start]Gebäude zu Wohnraum umgebaut[cite: 154].</p>`,
                         'source': 'Memorial Museums - Gedenkort Rummelsburg'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4855, 52.4955] }
@@ -258,9 +229,12 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'rote_kapelle', 'category': 'gedenken', 'title': 'Die Rote Kapelle (1940–1942) [cite: 157]', 'year': 1940,
+                        'id': 'rote_kapelle',
+                        'category': 'gedenken',
+                        'title': 'Die Rote Kapelle',
+                        'year': 1940,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/c/ca/Skulptur_Schulze-Boysen-Str_12_%28Liber%29_B%C3%BCrger_im_Widerstand%26Achim_K%C3%BChn%2620112.jpg',
-                        'description': `<h3>Widerstandsnetzwerk</h3><p>Großes antifaschistisches Widerstandsnetzwerk (über 150 Personen). [cite_start]Dokumentierten NS-Verbrechen und warnten die Sowjetunion vor Angriffen[cite: 162, 166].</p><h3>Verfolgung</h3><p>1942 Verhaftungswelle, über 50 Todesurteile/Ermordungen. [cite_start]Straßen und Schulen im Kiez tragen Namen der Mitglieder (Coppi, Harnack, Schulze-Boysen)[cite: 167, 169].</p>`,
+                        'description': `<h3>Widerstandsnetzwerk</h3><p>Großes antifaschistisches Widerstandsnetzwerk (über 150 Personen). [cite_start]Dokumentierten NS-Verbrechen und warnten die Sowjetunion vor Angriffen [cite: 161-166].</p><h3>Verfolgung</h3><p>1942 Verhaftungswelle, über 50 Todesurteile/Ermordungen. [cite_start]Straßen und Schulen im Kiez tragen Namen der Mitglieder (Coppi, Harnack, Schulze-Boysen)[cite: 168, 172].</p>`,
                         'source': 'Gedenktafeln in Berlin'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4872, 52.5138] }
@@ -268,9 +242,12 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'loeperplatz', 'category': 'gedenken', 'title': 'Ehrenmal Loeperplatz [cite: 174]', 'year': 1948,
+                        'id': 'loeperplatz',
+                        'category': 'gedenken',
+                        'title': 'Ehrenmal Loeperplatz',
+                        'year': 1948,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Loeperplatz_VDN_1.jpg',
-                        'description': `<h3>Opfer des Faschismus</h3><p>Vermutlich 1948 errichtet. [cite_start]Steinquader mit roter Pyramide und den Buchstaben "KZ" (symbolisiert den roten Winkel der politischen Häftlinge)[cite: 179, 183].</p>`,
+                        'description': `<h3>Opfer des Faschismus</h3><p>Vermutlich 1948 errichtet. [cite_start]Steinquader mit roter Pyramide und den Buchstaben "KZ" (symbolisiert den roten Winkel der politischen Häftlinge) [cite: 179-183].</p>`,
                         'source': 'Memorial Museums'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4795, 52.5238] }
@@ -278,21 +255,28 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'rathaus', 'category': 'gedenken', 'title': 'Rathaus Lichtenberg (Gedenktafel) [cite: 189]', 'year': 1933,
+                        'id': 'rathaus',
+                        'category': 'gedenken',
+                        'title': 'Gedenktafel Rathaus Lichtenberg',
+                        'year': 1933,
                         'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg',
-                        'description': `<h3>Verfolgte Politiker</h3><p>Erinnert an Bezirks- und Stadtverordnete, die 1933 ihrer Ämter enthoben wurden. [cite_start]Darunter Frieda Rosenthal (Suizid in Haft) und Johannes Fest (Berufsverbot)[cite: 196, 202, 206].</p>`,
+                        'description': `<h3>Verfolgte Politiker</h3><p>Erinnert an Bezirks- und Stadtverordnete, die 1933 ihrer Ämter enthoben wurden. [cite_start]Darunter Frieda Rosenthal (Suizid in Haft) und Johannes Fest (Berufsverbot) [cite: 196-206].</p>`,
                         'source': 'Bezirksamt Lichtenberg'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.4798, 52.5155] }
                 },
 
-                // === KATEGORIE 2: ORTE DES WIDERSTANDS (Aktuelle Initiativen) ===
+                // === KATEGORIE 2: ORTE DES WIDERSTANDS (Aktuell) ===
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'bunter_wind', 'category': 'widerstand', 'title': 'Bunter Wind für Lichtenberg [cite: 92]', 'year': 2012,
-                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
-                        'description': `<h3>Seit 2012</h3><p>Setzt Impulse für eine offene, demokratische Gesellschaft. [cite_start]Stärkt Zusammenhalt und Solidarität gegen Diskriminierung und Ausgrenzung [cite: 93, 94][cite_start].</p><h3>Motto</h3><p>"Solidarisch für eine starke und lebendige Demokratie!" [cite: 95]</p>`,
+                        'id': 'bunter_wind',
+                        'category': 'widerstand',
+                        'title': 'Bunter Wind für Lichtenberg',
+                        'year': 2012,
+                        'locked': true,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Rathaus_Lichtenberg.jpg', // Placeholder used due to no specific img in PDF
+                        'description': `<h3>Seit 2012</h3><p>Setzt Impulse für eine offene, demokratische Gesellschaft. [cite_start]Stärkt Zusammenhalt und Solidarität gegen Diskriminierung und Ausgrenzung [cite: 93][cite_start].</p><h3>Motto</h3><p>"Solidarisch für eine starke und lebendige Demokratie!" [cite: 95]</p>`,
                         'source': 'Bunter Wind für Lichtenberg'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.5055, 52.5115] }
@@ -300,9 +284,13 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'licht_blicke', 'category': 'widerstand', 'title': 'Licht-Blicke [cite: 103]', 'year': 2002,
-                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
-                        'description': `<h3>Seit 2002</h3><p>Netzwerkstelle für Demokratiepartnerschaften. [cite_start]Schnittstelle zwischen Politik, Verwaltung und Zivilgesellschaft [cite: 105, 107][cite_start].</p><h3>Aufgaben</h3><p>Unterstützung lokalen Engagements gegen Rechts, Förderung von Diversitätsbewusstsein, Koordinierung der Stolperstein-Verlegung und Jugendpartizipation[cite: 112, 119].</p>`,
+                        'id': 'licht_blicke',
+                        'category': 'widerstand',
+                        'title': 'Licht-Blicke',
+                        'year': 2002,
+                        'locked': true,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/e/e5/Gudrunstra%C3%9Fe_Berlin-Lichtenberg.jpg', // Placeholder location img
+                        'description': `<h3>Seit 2002</h3><p>Netzwerkstelle für Demokratiepartnerschaften. [cite_start]Schnittstelle zwischen Politik, Verwaltung und Zivilgesellschaft [cite: 107][cite_start].</p><h3>Aufgaben</h3><p>Unterstützung lokalen Engagements gegen Rechts, Förderung von Diversitätsbewusstsein, Koordinierung der Stolperstein-Verlegung und Jugendpartizipation [cite: 110-119].</p>`,
                         'source': 'Licht Blicke'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.5205, 52.4962] }
@@ -310,9 +298,13 @@
                 {
                     'type': 'Feature',
                     'properties': {
-                        [cite_start]'id': 'berliner_register', 'category': 'widerstand', 'title': 'Berliner Register [cite: 122]', 'year': 2005,
-                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
-                        [cite_start]'description': `<h3>Seit 2005</h3><p>Dokumentation von Diskriminierung und Ausgrenzung im Alltag (rassistisch, antisemitisch, rechts, etc.)[cite: 124].</p><h3>Methode</h3><p>Bürger:innen melden Vorfälle (auch solche, die keine Straftaten sind, wie Aufkleber oder Sprüche). [cite_start]Diese werden in einer Chronik veröffentlicht, um Ausgrenzung sichtbar zu machen[cite: 126, 127].</p>`,
+                        'id': 'berliner_register',
+                        'category': 'widerstand',
+                        'title': 'Berliner Register',
+                        'year': 2005,
+                        'locked': true,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder location img
+                        [cite_start]'description': `<h3>Seit 2005</h3><p>Dokumentation von Diskriminierung und Ausgrenzung im Alltag (rassistisch, antisemitisch, rechts, etc.)[cite: 124].</p><h3>Methode</h3><p>Bürger:innen melden Vorfälle (auch solche, die keine Straftaten sind, wie Aufkleber oder Sprüche). [cite_start]Diese werden in einer Chronik veröffentlicht, um Ausgrenzung sichtbar zu machen [cite: 126-127].</p>`,
                         'source': 'Berliner Register'
                     },
                     'geometry': { 'type': 'Point', 'coordinates': [13.5055, 52.5115] }
@@ -321,65 +313,105 @@
         };
 
         // ------------------------------------------------------------------
-        // 2. STATE
+        // APP LOGIC (NO-FAIL START)
         // ------------------------------------------------------------------
-        let state = {
-            discovered: [],
-            required: 3,
-            unlocked: false,
-            scanner: null,
-            lastScannedId: null
-        };
+        function startApp() {
+            // 1. Hide Overlay IMMEDIATELY
+            const overlay = document.getElementById('start-screen');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 500);
 
-        const map = new mapboxgl.Map({
-            container: 'map', style: 'mapbox://styles/mapbox/dark-v11',
-            center: [13.485, 52.51], zoom: 12.5, pitch: 45,
-            bearing: -10
-        });
+            // 2. Initialize Mapbox
+            initMap();
 
-        // ------------------------------------------------------------------
-        // 3. START EXHIBITION (SAFE INIT)
-        // ------------------------------------------------------------------
-        function startExhibition() {
-            // Remove start screen IMMEDIATELY
-            document.getElementById('start-screen').style.display = 'none';
-            
-            // Try init scanner, but don't block app if it fails
-            setTimeout(initScanner, 500);
+            // 3. Try Scanner (Silent fail if not allowed)
+            setTimeout(initScanner, 1000);
         }
 
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaWxpYXNtZXJhYmloYSIsImEiOiJjbWxndXhkeHYwMjZwM2RxdmlmbW41MmVlIn0.pb_GFtsw_uGl7eOkRZfKvw'; // <--- TOKEN HIER EINFÜGEN!
+
+        let map;
+        let state = { discovered: [], required: 3, unlocked: false, scanner: null, lastScannedId: null };
+
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/dark-v11',
+                center: [13.485, 52.51], zoom: 12.5, pitch: 45
+            });
+
+            map.on('load', () => {
+                // Add Content to Map
+                map.addSource('markers', { 'type': 'geojson', 'data': geoData });
+                
+                // Glow Layer
+                map.addLayer({ 
+                    'id': 'marker-glow', 'type': 'circle', 'source': 'markers', 
+                    'paint': { 
+                        'circle-radius': 70, 
+                        'circle-color': ['match', ['get', 'category'], 'erinnerung', '#D4AF37', 'gedenken', '#A0A0A0', 'widerstand', '#00E676', '#fff'], 
+                        'circle-opacity': 0.5, 'circle-blur': 0.5 
+                    } 
+                });
+                
+                // Core Layer
+                map.addLayer({ 
+                    'id': 'marker-core', 'type': 'circle', 'source': 'markers', 
+                    'paint': { 'circle-radius': 10, 'circle-color': '#fff', 'circle-stroke-width': 2, 'circle-stroke-color': '#000' } 
+                });
+
+                // Interactions
+                map.on('click', 'marker-core', (e) => handleMarker(e.features[0].properties, e.features[0].geometry.coordinates));
+                map.on('mouseenter', 'marker-core', () => map.getCanvas().style.cursor = 'pointer');
+                map.on('mouseleave', 'marker-core', () => map.getCanvas().style.cursor = '');
+                
+                // 3D Buildings
+                const layers = map.getStyle().layers;
+                const labelLayerId = layers.find(l => l.type === 'symbol' && l.layout['text-field']).id;
+                map.addLayer({ 'id': '3d-buildings', 'source': 'composite', 'source-layer': 'building', 'filter': ['==', 'extrude', 'true'], 'type': 'fill-extrusion', 'paint': { 'fill-extrusion-color': '#222', 'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-opacity': 0.9 } }, labelLayerId);
+            });
+        }
+
+        function handleMarker(props, coords) {
+            if (props.locked && !state.unlocked) { openSidebarLocked(); return; }
+            if (!state.discovered.includes(props.id) && !props.locked) { state.discovered.push(props.id); updateProgress(); }
+            
+            map.flyTo({ center: coords, zoom: 16, pitch: 60, offset: [0, -200], speed: 0.8 });
+            openSidebar(props);
+        }
+
+        function updateProgress() {
+            const pct = Math.min((state.discovered.length / state.required) * 100, 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            if (state.discovered.length >= state.required && !state.unlocked) { setTimeout(unlockAll, 1000); }
+        }
+
+        function unlockAll() {
+            state.unlocked = true;
+            document.getElementById('lock-status').innerText = "FREIGESCHALTET";
+            document.getElementById('lock-status').style.color = "#00E676";
+            document.getElementById('progress-bar').style.background = "#00E676";
+            alert("GESCHICHTE ERFORSCHT - GEGENWART FREIGESCHALTET!");
+        }
+
+        // --- SCANNER LOGIC ---
         function initScanner() {
             try {
-                state.scanner = new Html5Qrcode("reader");
-                const config = { fps: 10, qrbox: { width: 80, height: 80 } }; 
-                
-                state.scanner.start(
-                    { facingMode: "environment" }, 
-                    config, 
-                    onScanSuccess
-                ).catch(err => {
-                    console.log("Scanner Error (Camera not allowed?):", err);
-                });
-            } catch(e) {
-                console.log("Scanner Lib Error:", e);
-            }
+                if(!state.scanner) state.scanner = new Html5Qrcode("reader");
+                state.scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 80 }, onScanSuccess)
+                .catch(err => console.log("Scanner stumm geschaltet (Permission?):", err));
+            } catch(e) {}
         }
 
         function onScanSuccess(decodedText) {
             let foundId = null;
-            for(let feat of geoData.features) {
-                if(decodedText.includes(feat.properties.id)) {
-                    foundId = feat.properties.id;
-                    break;
-                }
+            for(let f of geoData.features) {
+                if(decodedText.includes(f.properties.id)) { foundId = f.properties.id; break; }
             }
-
             if(foundId && foundId !== state.lastScannedId) {
                 state.lastScannedId = foundId;
                 state.scanner.pause();
-                
-                const overlay = document.getElementById('scan-hit-overlay');
-                overlay.style.display = 'flex';
+                document.getElementById('scan-hit-overlay').style.display = 'flex';
                 document.getElementById('mini-scanner').style.borderColor = "#00E676";
             }
         }
@@ -387,23 +419,8 @@
         function executeScanAction() {
             const id = state.lastScannedId;
             const feature = geoData.features.find(f => f.properties.id === id);
+            if(feature) handleMarker(feature.properties, feature.geometry.coordinates);
             
-            if(feature) {
-                if (!state.discovered.includes(id)) {
-                    state.discovered.push(id);
-                    updateProgress();
-                }
-                
-                if (feature.properties.locked) {
-                    unlockAll();
-                } else {
-                    document.getElementById('year-slider').value = feature.properties.year;
-                    document.getElementById('year-display').innerText = feature.properties.year;
-                    updateMap(feature.properties.year);
-                }
-                handleMarker(feature.properties, feature.geometry.coordinates);
-            }
-
             setTimeout(() => {
                 document.getElementById('scan-hit-overlay').style.display = 'none';
                 document.getElementById('mini-scanner').style.borderColor = "#444";
@@ -412,96 +429,10 @@
             }, 1000);
         }
 
-        // ------------------------------------------------------------------
-        // 4. MAP LOGIC
-        // ------------------------------------------------------------------
-        map.on('load', () => {
-            map.addSource('path-source', { 'type': 'geojson', 'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } } });
-            map.addLayer({ 'id': 'path-glow', 'type': 'line', 'source': 'path-source', 'paint': { 'line-color': '#00FFFF', 'line-width': 10, 'line-opacity': 0.3, 'line-blur': 4 } });
-            map.addLayer({ 'id': 'path-core', 'type': 'line', 'source': 'path-source', 'paint': { 'line-color': '#00FFFF', 'line-width': 3, 'line-dasharray': [2, 1] } });
-
-            const layers = map.getStyle().layers;
-            const labelLayerId = layers.find(l => l.type === 'symbol' && l.layout['text-field']).id;
-            map.addLayer({ 'id': '3d-buildings', 'source': 'composite', 'source-layer': 'building', 'filter': ['==', 'extrude', 'true'], 'type': 'fill-extrusion', 'paint': { 'fill-extrusion-color': '#222', 'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-opacity': 0.9 } }, labelLayerId);
-
-            map.addSource('markers', { 'type': 'geojson', 'data': geoData });
-            
-            map.addLayer({ 
-                'id': 'marker-glow', 
-                'type': 'circle', 
-                'source': 'markers', 
-                'paint': { 
-                    'circle-radius': 70, 
-                    'circle-color': ['match', ['get', 'category'], 'erinnerung', '#D4AF37', 'gedenken', '#A0A0A0', 'widerstand', '#00E676', 'heute', '#FF3D00', '#fff'], 
-                    'circle-opacity': 0.5, 'circle-blur': 0.5 
-                } 
-            });
-            map.addLayer({ 'id': 'marker-core', 'type': 'circle', 'source': 'markers', 'paint': { 'circle-radius': 10, 'circle-color': '#fff', 'circle-stroke-width': 2, 'circle-stroke-color': '#000' } });
-
-            map.on('click', 'marker-core', (e) => handleMarker(e.features[0].properties, e.features[0].geometry.coordinates));
-            map.on('mouseenter', 'marker-core', () => map.getCanvas().style.cursor = 'pointer');
-            map.on('mouseleave', 'marker-core', () => map.getCanvas().style.cursor = '');
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const evt = urlParams.get('event');
-            if(evt) {
-                document.getElementById('start-screen').style.display = 'none';
-                const t = geoData.features.find(f => f.properties.id === evt);
-                if(t) handleMarker(t.properties, t.geometry.coordinates);
-            }
-
-            updateMap(1933);
-        });
-
-        function handleMarker(props, coords) {
-            if (props.locked && !state.unlocked) { openSidebarLocked(); return; }
-            if (!state.discovered.includes(props.id) && !props.locked) { state.discovered.push(props.id); updateProgress(); }
-            
-            const isPortrait = window.innerHeight > window.innerWidth;
-            const offset = isPortrait ? [0, -200] : [-200, 0];
-            map.flyTo({ center: coords, zoom: 16, pitch: 60, offset: offset, speed: 0.8 });
-            openSidebar(props);
-        }
-
-        function updateProgress() {
-            const pct = Math.min((state.discovered.length / state.required) * 100, 100);
-            document.getElementById('progress-bar').style.width = pct + '%';
-            if (state.discovered.length >= state.required && !state.unlocked) {
-                setTimeout(unlockAll, 1000);
-            }
-        }
-
-        function unlockAll() {
-            state.unlocked = true;
-            document.getElementById('lock-status').innerText = "FREIGESCHALTET";
-            document.getElementById('lock-status').style.color = "#00E676";
-            document.getElementById('progress-bar').style.background = "#00E676";
-            document.getElementById('year-slider').value = 2026;
-            document.getElementById('year-display').innerText = 2026;
-            updateMap(2026);
-        }
-
-        const slider = document.getElementById('year-slider');
-        slider.addEventListener('input', (e) => {
-            const year = parseInt(e.target.value);
-            document.getElementById('year-display').innerText = year;
-            updateMap(year);
-        });
-
-        function updateMap(year) {
-            const filter = ['<=', ['get', 'year'], year];
-            map.setFilter('marker-glow', filter);
-            map.setFilter('marker-core', filter);
-            
-            const visible = geoData.features.filter(f => f.properties.year <= year);
-            visible.sort((a,b) => a.properties.year - b.properties.year);
-            const coords = visible.map(f => f.geometry.coordinates);
-            if(map.getSource('path-source')) map.getSource('path-source').setData({ 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': coords } });
-        }
-
+        // --- SIDEBAR UI ---
         function openSidebar(data) {
             const content = document.getElementById('sidebar-content');
-            const colors = { 'erinnerung': '#D4AF37', 'gedenken': '#A0A0A0', 'widerstand': '#00E676', 'heute': '#FF3D00' };
+            const colors = { 'erinnerung': '#D4AF37', 'gedenken': '#A0A0A0', 'widerstand': '#00E676' };
             content.innerHTML = `
                 <img src="${data.image}" class="hero-img">
                 <div class="sidebar-content">
@@ -515,7 +446,7 @@
         }
 
         function openSidebarLocked() {
-            document.getElementById('sidebar-content').innerHTML = `<div class="locked-view"><div class="locked-icon">🔒</div><h2 style="color:#FF3D00">DATEN VERSCHLÜSSELT</h2><p>Erforschen Sie erst die Geschichte.</p></div>`;
+            document.getElementById('sidebar-content').innerHTML = `<div class="locked-view"><div class="locked-icon">🔒</div><h2 style="color:#FF3D00">DATEN VERSCHLÜSSELT</h2><p>Erforsche erst die Geschichte.</p></div>`;
             document.getElementById('sidebar').classList.add('open');
         }
 
