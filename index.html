@@ -20,8 +20,13 @@
         :root {
             /* Colors */
             --bg-color: #050505; --text-main: #ffffff;
-            --c-erinnerung: #D4AF37; --c-gedenken: #A0A0A0;
-            --c-widerstand: #00E676; --c-heute: #FF3D00; --c-path: #00FFFF;
+            --c-erinnerung: #D4AF37;   /* Gold */
+            --c-gedenken: #A0A0A0;     /* Silver */
+            --c-widerstand: #00E676;   /* Neon Green */
+            --c-heute: #FF3D00;        /* Neon Red */
+            --c-path: #00FFFF;         /* Cyan Path */
+
+            /* Fonts */
             --font-head: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif;
             --sidebar-width: 500px;
         }
@@ -29,7 +34,7 @@
         body { margin: 0; padding: 0; background: var(--bg-color); color: var(--text-main); font-family: var(--font-body); overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
 
-        /* --- START SCREEN (Wichtig für Browser-Rechte) --- */
+        /* --- START SCREEN --- */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 9999;
@@ -49,7 +54,7 @@
         /* --- MINI SCANNER (Positioned Lower) --- */
         #mini-scanner {
             position: absolute; 
-            top: 260px; /* Position tiefer, unter dem Titel */
+            top: 260px; /* Position tiefer */
             left: 30px; 
             width: 120px; height: 120px; 
             background: #000;
@@ -122,12 +127,13 @@
         .source { font-size: 0.75rem; color: #666; border-top: 1px solid #222; padding-top: 20px; font-style: italic; }
         .locked-view { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; color: #555; }
         .locked-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
+        .footer-note { font-size: 0.8rem; color: #888; margin-top: 30px; border-top: 1px solid #333; padding-top: 15px; }
 
         @media (max-width: 1024px) {
             :root { --sidebar-width: 100%; }
             #timeline-ui { width: 90%; bottom: 20px; padding: 15px 20px; }
             .sidebar-content { padding: 25px; }
-            #mini-scanner { top: 120px; left: 20px; } /* Mobile adjustments */
+            #mini-scanner { top: 120px; left: 20px; } 
         }
         .mapboxgl-popup-content { background: #000; color: #fff; border: 1px solid #444; font-family: var(--font-body); padding: 10px 14px; }
         .mapboxgl-popup-close-button { display: none; }
@@ -153,6 +159,7 @@
         <div id="mini-scanner">
             <div id="reader"></div>
             <div class="scanner-label">SCAN QR</div>
+            
             <div id="scan-hit-overlay" onclick="executeScanAction()">
                 <div class="hit-icon">➜</div>
                 <div class="hit-text">ÖFFNEN</div>
@@ -195,18 +202,121 @@
         const geoData = {
             'type': 'FeatureCollection',
             'features': [
-                { 'type': 'Feature', 'properties': { 'id': 'h1', 'category': 'erinnerung', 'title': 'Der Blutbaum am Loeperplatz', 'year': 1934, 'image': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Gedenkstein_Loeperplatz_%28Berlin-Lichtenberg%29.jpg', 'description': `<h3>Historischer Kontext</h3><p>Der Loeperplatz in Lichtenberg, einst ein belebter Marktplatz, verwandelte sich nach der Machtübernahme der Nationalsozialisten 1933 in einen Ort des Schreckens.</p><h3>Das Ereignis</h3><p>Der Platz wurde zur Richtstätte. Eine alte Eiche, die hier stand, erhielt im Volksmund den Namen "Blutbaum", da an ihr Hinrichtungen stattfanden.</p>`, 'source': 'Gedenkstätte Deutscher Widerstand' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4800, 52.5135] } },
-                { 'type': 'Feature', 'properties': { 'id': 'h2', 'category': 'erinnerung', 'title': 'Zwangsarbeiterlager Rummelsburg', 'year': 1941, 'image': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Bundesarchiv_Bild_183-1990-0704-026%2C_Berlin%2C_Rummelsburg%2C_M%C3%A4nnerhaftanstalt.jpg', 'description': `<h3>Ein Ort der Ausbeutung</h3><p>Das "Arbeitserziehungslager" (AEL) Rummelsburg war ein Instrument des NS-Terrors. Hier wurden Tausende Menschen interniert.</p>`, 'source': 'Museum Lichtenberg' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4850, 52.4950] } },
-                { 'type': 'Feature', 'properties': { 'id': 'h3', 'category': 'erinnerung', 'title': 'Erna Lugebiel', 'year': 1943, 'image': 'https://upload.wikimedia.org/wikipedia/commons/6/66/Stadthaus_Lichtenberg_Berlin.jpg', 'description': `<h3>Zivilcourage im Alltag</h3><p>Erna Lugebiel, eine Schneiderin aus der Möllendorffstraße, zeigte, was Zivilcourage bedeutete. Sie versteckte jüdische Bürger und politisch Verfolgte.</p>`, 'source': 'Gedenkstätte Stille Helden' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4790, 52.5220] } },
-                { 'type': 'Feature', 'properties': { 'id': 'w1', 'category': 'widerstand', 'title': 'Mainzer Straße', 'year': 1990, 'image': 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Mainzer_Stra%C3%9Fe_Berlin-Friedrichshain_1990.jpg', 'description': `<h3>Das Ende eines Freiraums</h3><p>Im November 1990 fand in der Mainzer Straße einer der massivsten Polizeieinsätze der Nachkriegsgeschichte statt.</p>`, 'source': 'Zeitzeugenarchiv Berlin' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4620, 52.5120] } },
-                { 'type': 'Feature', 'properties': { 'id': 'g1', 'category': 'gedenken', 'title': 'Silvio Meier', 'year': 1992, 'image': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Gedenktafel_Silvio_Meier_%28U-Bhf_Samariterstra%C3%9Fe%29.jpg', 'description': `<h3>Ein traumatisches Ereignis</h3><p>Am 21. November 1992 wurde der Antifaschist Silvio Meier im U-Bahnhof Samariterstraße von Neonazis erstochen.</p>`, 'source': 'Amadeu Antonio Stiftung' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4650, 52.5140] } },
-                { 'type': 'Feature', 'properties': { 'id': 'g2', 'category': 'gedenken', 'title': 'Weitlingstraße', 'year': 1995, 'image': 'https://upload.wikimedia.org/wikipedia/commons/3/36/Berlin%2C_Lichtenberg%2C_Weitlingstrasse.jpg', 'description': `<h3>National Befreite Zone?</h3><p>In den 90er Jahren erlangte der Weitlingkiez traurige Berühmtheit. Neonazi-Kameradschaften versuchten hier, eine sogenannte "National Befreite Zone" zu etablieren.</p>`, 'source': 'Licht-Blicke Podcast' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4985, 52.5075] } },
-                { 'type': 'Feature', 'properties': { 'id': 'g3', 'category': 'gedenken', 'title': 'Eugeniu Botnari', 'year': 2016, 'image': 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Bahnhof_Berlin-Lichtenberg_Empfangsgeb%C3%A4ude_20160808_1.jpg', 'description': `<h3>Tödlicher Sozialdarwinismus</h3><p>Im September 2016 wurde der wohnungslose Eugeniu Botnari im Bahnhof Lichtenberg vom Filialleiter eines Supermarktes tödlich misshandelt.</p>`, 'source': 'Initiative Gedenken an Eugeniu Botnari' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4970, 52.5100] } },
-                { 'type': 'Feature', 'properties': { 'id': 'cur1', 'category': 'heute', 'title': 'LOCKED: Ostkreuz', 'year': 2024, 'locked':true, 'image': 'https://upload.wikimedia.org/wikipedia/commons/c/cf/Bahnhof_Berlin_Ostkreuz_Eingang_Sonntagsstr.jpg', 'description': `<h3>Strategie der Raumnahme</h3><p>2024 ereignete sich ein organisierter Angriff auf Antifaschisten am Ostkreuz durch die Gruppe "NRJ".</p>`, 'source': 'Berliner Register 2024' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4693, 52.5030] } },
-                { 'type': 'Feature', 'properties': { 'id': 'cur2', 'category': 'heute', 'title': 'LOCKED: Code 1161', 'year': 2025, 'locked':true, 'image': 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Berlin_Wartenberg_Woldegker_Stra%C3%9Fe_Grundschule_im_Gr%C3%BCnen_01.jpg', 'description': `<h3>Propaganda auf dem Schulhof</h3><p>Massives Auftreten von Stickern mit dem Code "1161" (Anti-Antifa) an Schulen.</p>`, 'source': 'Lichtenberger Register' }, 'geometry': { 'type': 'Point', 'coordinates': [13.5000, 52.5400] } },
-                { 'type': 'Feature', 'properties': { 'id': 'cur3', 'category': 'heute', 'title': 'LOCKED: Jugendclub', 'year': 2025, 'locked':true, 'image': 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Berlin_Wartenberg_Woldegker_Stra%C3%9Fe_Grundschule_im_Gr%C3%BCnen_01.jpg', 'description': `<h3>Schutzräume in Gefahr</h3><p>Ein Jugendclub wurde mit Reizstoff attackiert.</p>`, 'source': 'Polizei Berlin' }, 'geometry': { 'type': 'Point', 'coordinates': [13.5200, 52.4900] } },
-                { 'type': 'Feature', 'properties': { 'id': 'cur4', 'category': 'widerstand', 'title': 'LOCKED: Bündnis Bunter Wind', 'year': 2026, 'locked':true, 'image': 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Rathaus_Lichtenberg.jpg', 'description': `<h3>Die Brandmauer steht</h3><p>Das Bündnis organisiert den Widerstand gegen rechte Aufmärsche.</p>`, 'source': 'Bündnis für Demokratie' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4815, 52.5160] } },
-                { 'type': 'Feature', 'properties': { 'id': 'cur5', 'category': 'widerstand', 'title': 'LOCKED: Licht-Blicke', 'year': 2026, 'locked':true, 'image': 'https://upload.wikimedia.org/wikipedia/commons/e/e5/Gudrunstra%C3%9Fe_Berlin-Lichtenberg.jpg', 'description': `<h3>Fachstelle gegen Rechts</h3><p>Licht-Blicke unterstützt Betroffene von rechter Gewalt und berät Schulen.</p>`, 'source': 'www.licht-blicke.org' }, 'geometry': { 'type': 'Point', 'coordinates': [13.4880, 52.5120] } }
+                // === KATEGORIE 1: ORTE DER ERINNERUNG (Opfer & Widerstandskämpfer:innen) ===
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'kurt_schneider', 'category': 'erinnerung', 'title': 'Kurt Schneider (1961–1999) [cite: 13]', 'year': 1999,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/01/Memorial_plaque_metal_Kurt_Schneider_Berlin%2C_Germany.jpg',
+                        'description': `<h3>Opfer rechter Gewalt</h3><p>Kurt Schneider wurde 1961 in Königs Wusterhausen geboren. Er arbeitete als Maurer. In der Nacht zum 6. Oktober 1999 wurde er von vier Neonazis überfallen, weil sie seinen Gruß als "Beleidigung" empfanden. [cite_start]Sie schlugen ihn zusammen, kehrten später mit einem Messer zurück und ermordeten ihn[cite: 17, 18].</p><h3>Kontext</h3><p>Vor Gericht gaben die Täter an, ihn als "minderwertigen Menschen" angesehen zu haben. Das Gericht erkannte zunächst kein politisches Motiv. [cite_start]Erst 2018 wurde die Tat durch eine TU-Studie offiziell als rechtsextremer Gewaltakt anerkannt[cite: 22, 25].</p>`,
+                        'source': 'Gedenktafeln in Berlin - Kurt Schneider'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4802, 52.5185] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'silvio_meier', 'category': 'erinnerung', 'title': 'Silvio Meier (1965–1992) [cite: 30]', 'year': 1992,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/1/14/Silvio_Meier.jpg',
+                        'description': `<h3>Aktivist & Opfer</h3><p>Aktiv in der DDR-Opposition (Kirche von Unten, Umweltbibliothek). [cite_start]Nach der Wende Hausbesetzer in der Schreinerstraße 47. Wurde 1992 aufgrund seines antifaschistischen Auftretens von Neonazis im U-Bahnhof Samariterstraße ermordet[cite: 37, 39].</p><h3>Gedenken</h3><p>Jährliche Gedenkdemonstration (1992–2014). [cite_start]Gedenktafel am U-Bhf Samariterstraße (fest verankert 2007) und Umbenennung der Gabelsbergerstraße in Silvio-Meier-Straße (2013)[cite: 46, 49].</p>`,
+                        'source': 'Amadeu Antonio Stiftung - Silvio Meier'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4658, 52.5144] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'eugeniu_botnari', 'category': 'erinnerung', 'title': 'Eugeniu Botnari (1982–2016) [cite: 52]', 'year': 2016,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/03/Gedenktafel_Eugeniu-Botnari-Platz_%28Rumbg%29_Eugeniu_Botnari.jpg',
+                        'description': `<h3>Opfer rassistischer Gewalt</h3><p>Wurde am 17. September 2016 vom Filialleiter eines Edeka-Marktes des Ladendiebstahls bezichtigt, in ein Lager gezerrt und mit Quarzhandschuhen verprügelt. [cite_start]Botnari starb Tage später an einem Schädel-Hirn-Trauma[cite: 57, 61].</p><h3>Kontext</h3><p>Der Täter filmte die Tat und teilte sie mit menschenverachtenden Kommentaren. Motiv war Sozialdarwinismus (Hass auf Obdachlose) und Rassismus. [cite_start]Im April 2023 wurde der Platz nach Botnari benannt[cite: 64, 71].</p>`,
+                        'source': 'Amadeu Antonio Stiftung - Eugeniu Botnari'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4975, 52.5098] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'kaethe_tucholla', 'category': 'erinnerung', 'title': 'Käthe Tucholla (1910–1943) [cite: 74]', 'year': 1943,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Kaskelkiez_Kaskelstr_Gedenktafel_Tucholla.JPG',
+                        'description': `<h3>Widerstandskämpferin</h3><p>Sekretärin und Hockeyspielerin bei Sparta Lichtenberg. Engagierte sich mit ihrem Mann Felix in der KPD-Widerstandsgruppe um Robert Uhrig. [cite_start]Verbreitete Flugblätter und unterstützte Fallschirmjäger[cite: 79, 83].</p><h3>Schicksal</h3><p>Festnahme am 25. Juli 1942. Zum Tode verurteilt wegen "Vorbereitung zum Hochverrat". [cite_start]Ermordet am 28. September 1943 in Plötzensee[cite: 87, 89].</p>`,
+                        'source': 'Frauen im Widerstand gegen den Nationalsozialismus - Käthe Tucholla'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4832, 52.5038] }
+                },
+
+                // === KATEGORIE 3: ORTE DES GEDENKENS (Historische Orte) ===
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'rummelsburg', 'category': 'gedenken', 'title': 'Gedenkort Rummelsburg (1933–1990) [cite: 139]', 'year': 1933,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Bundesarchiv_Bild_183-1990-0704-026%2C_Berlin%2C_Rummelsburg%2C_M%C3%A4nnerhaftanstalt.jpg',
+                        'description': `<h3>Verfolgung und Haft</h3><p>1879 als Arbeitshaus eröffnet. Im NS-Staat Verfolgung von "Asozialen"; 1941 Deportation jüdischer Insassen zur Ermordung (Aktion T4). [cite_start]In der DDR Nutzung als Gefängnis (auch für politische Häftlinge)[cite: 143, 146, 152].</p><h3>Status heute</h3><p>Gedenkort seit 2015; [cite_start]Gebäude zu Wohnraum umgebaut[cite: 154, 155].</p>`,
+                        'source': 'Memorial Museums - Gedenkort Rummelsburg'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4855, 52.4955] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'rote_kapelle', 'category': 'gedenken', 'title': 'Die Rote Kapelle (1940–1942) [cite: 157]', 'year': 1940,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/c/ca/Skulptur_Schulze-Boysen-Str_12_%28Liber%29_B%C3%BCrger_im_Widerstand%26Achim_K%C3%BChn%2620112.jpg',
+                        'description': `<h3>Widerstandsnetzwerk</h3><p>Großes antifaschistisches Widerstandsnetzwerk (über 150 Personen). [cite_start]Dokumentierten NS-Verbrechen und warnten die Sowjetunion vor Angriffen[cite: 162, 166].</p><h3>Verfolgung</h3><p>1942 Verhaftungswelle, über 50 Todesurteile/Ermordungen. [cite_start]Straßen und Schulen im Kiez tragen Namen der Mitglieder (Coppi, Harnack, Schulze-Boysen)[cite: 167, 169].</p>`,
+                        'source': 'Gedenktafeln in Berlin'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4872, 52.5138] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'loeperplatz', 'category': 'gedenken', 'title': 'Ehrenmal Loeperplatz [cite: 174]', 'year': 1948,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Loeperplatz_VDN_1.jpg',
+                        'description': `<h3>Opfer des Faschismus</h3><p>Vermutlich 1948 errichtet. [cite_start]Steinquader mit roter Pyramide und den Buchstaben "KZ" (symbolisiert den roten Winkel der politischen Häftlinge)[cite: 179, 183].</p>`,
+                        'source': 'Memorial Museums'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4795, 52.5238] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'rathaus', 'category': 'gedenken', 'title': 'Rathaus Lichtenberg (Gedenktafel) [cite: 189]', 'year': 1933,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg',
+                        'description': `<h3>Verfolgte Politiker</h3><p>Erinnert an Bezirks- und Stadtverordnete, die 1933 ihrer Ämter enthoben wurden. [cite_start]Darunter Frieda Rosenthal (Suizid in Haft) und Johannes Fest (Berufsverbot)[cite: 196, 202, 206].</p>`,
+                        'source': 'Bezirksamt Lichtenberg'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.4798, 52.5155] }
+                },
+
+                // === KATEGORIE 2: ORTE DES WIDERSTANDS (Aktuelle Initiativen) ===
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'bunter_wind', 'category': 'widerstand', 'title': 'Bunter Wind für Lichtenberg [cite: 92]', 'year': 2012,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
+                        'description': `<h3>Seit 2012</h3><p>Setzt Impulse für eine offene, demokratische Gesellschaft. [cite_start]Stärkt Zusammenhalt und Solidarität gegen Diskriminierung und Ausgrenzung [cite: 93, 94][cite_start].</p><h3>Motto</h3><p>"Solidarisch für eine starke und lebendige Demokratie!" [cite: 95]</p>`,
+                        'source': 'Bunter Wind für Lichtenberg'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.5055, 52.5115] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'licht_blicke', 'category': 'widerstand', 'title': 'Licht-Blicke [cite: 103]', 'year': 2002,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
+                        'description': `<h3>Seit 2002</h3><p>Netzwerkstelle für Demokratiepartnerschaften. [cite_start]Schnittstelle zwischen Politik, Verwaltung und Zivilgesellschaft [cite: 105, 107][cite_start].</p><h3>Aufgaben</h3><p>Unterstützung lokalen Engagements gegen Rechts, Förderung von Diversitätsbewusstsein, Koordinierung der Stolperstein-Verlegung und Jugendpartizipation[cite: 112, 119].</p>`,
+                        'source': 'Licht Blicke'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.5205, 52.4962] }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        [cite_start]'id': 'berliner_register', 'category': 'widerstand', 'title': 'Berliner Register [cite: 122]', 'year': 2005,
+                        'image': 'https://upload.wikimedia.org/wikipedia/commons/0/02/Rathaus_Lichtenberg_West-_und_Hauptfassade_2021.jpg', // Placeholder used
+                        [cite_start]'description': `<h3>Seit 2005</h3><p>Dokumentation von Diskriminierung und Ausgrenzung im Alltag (rassistisch, antisemitisch, rechts, etc.)[cite: 124].</p><h3>Methode</h3><p>Bürger:innen melden Vorfälle (auch solche, die keine Straftaten sind, wie Aufkleber oder Sprüche). [cite_start]Diese werden in einer Chronik veröffentlicht, um Ausgrenzung sichtbar zu machen[cite: 126, 127].</p>`,
+                        'source': 'Berliner Register'
+                    },
+                    'geometry': { 'type': 'Point', 'coordinates': [13.5055, 52.5115] }
+                }
             ]
         };
 
@@ -317,7 +427,9 @@
             map.addSource('markers', { 'type': 'geojson', 'data': geoData });
             
             map.addLayer({ 
-                'id': 'marker-glow', 'type': 'circle', 'source': 'markers', 
+                'id': 'marker-glow', 
+                'type': 'circle', 
+                'source': 'markers', 
                 'paint': { 
                     'circle-radius': 70, 
                     'circle-color': ['match', ['get', 'category'], 'erinnerung', '#D4AF37', 'gedenken', '#A0A0A0', 'widerstand', '#00E676', 'heute', '#FF3D00', '#fff'], 
@@ -330,11 +442,10 @@
             map.on('mouseenter', 'marker-core', () => map.getCanvas().style.cursor = 'pointer');
             map.on('mouseleave', 'marker-core', () => map.getCanvas().style.cursor = '');
 
-            // Deep Link (Manual Scan)
             const urlParams = new URLSearchParams(window.location.search);
             const evt = urlParams.get('event');
             if(evt) {
-                document.getElementById('start-screen').style.display = 'none'; // skip start screen
+                document.getElementById('start-screen').style.display = 'none';
                 const t = geoData.features.find(f => f.properties.id === evt);
                 if(t) handleMarker(t.properties, t.geometry.coordinates);
             }
@@ -391,7 +502,15 @@
         function openSidebar(data) {
             const content = document.getElementById('sidebar-content');
             const colors = { 'erinnerung': '#D4AF37', 'gedenken': '#A0A0A0', 'widerstand': '#00E676', 'heute': '#FF3D00' };
-            content.innerHTML = `<img src="${data.image}" class="hero-img"><div class="sidebar-content"><span class="cat-tag" style="border-color:${colors[data.category]}; color:${colors[data.category]}">${data.category.toUpperCase()}</span><h2>${data.title}</h2><div class="article">${data.description}</div><div class="source">Quelle: ${data.source}</div></div>`;
+            content.innerHTML = `
+                <img src="${data.image}" class="hero-img">
+                <div class="sidebar-content">
+                    <span class="cat-tag" style="border-color:${colors[data.category]}; color:${colors[data.category]}">${data.category.toUpperCase()}</span>
+                    <h2>${data.title}</h2>
+                    <div class="article">${data.description}</div>
+                    <div class="source">Quelle: ${data.source} • Jahr: ${data.year}</div>
+                    [cite_start]<div class="footer-note">Anlaufstellen für Opfer rechter Gewalt: Reach Out Berlin [cite: 208]</div>
+                </div>`;
             document.getElementById('sidebar').classList.add('open');
         }
 
